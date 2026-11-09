@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blood pressure · Sep 6–Nov 9, 2026</title>
+<style>
+:root{color-scheme:light;--bg:#f4f6fb;--card:#fff;--ink:#172033;--muted:#667085;--grid:#e4e9f2;--sys:#2563eb;--dia:#0891b2;--visit:#be123c}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}main{max-width:1100px;margin:auto;padding:30px 18px 48px}h1{margin:0;font-size:clamp(1.7rem,4vw,2.6rem);letter-spacing:-.03em}.intro,.note{color:var(--muted)}.card{margin-top:20px;background:var(--card);padding:18px;border-radius:16px;box-shadow:0 8px 26px #18264012}svg{display:block;width:100%;height:auto}.legend{display:flex;flex-wrap:wrap;gap:16px;color:var(--muted);font-size:.92rem;margin-top:8px}.legend span{display:inline-flex;align-items:center;gap:7px}.key{width:11px;height:11px;border-radius:50%;display:inline-block}.vline{width:18px;height:0;border-top:2px dashed var(--visit);display:inline-block}#status{padding:12px;border-radius:9px;background:#fff7ed;color:#9a3412}.note{font-size:.9rem}.stats{color:var(--muted);font-size:.9rem;margin-top:10px}@media(max-width:600px){main{padding:22px 10px}.card{padding:12px}}
+</style>
+</head>
+<body><main>
+<h1>Blood pressure</h1>
+<p class="intro">Recorded readings from September 6 through November 9, 2026</p>
+<p id="status" role="status">Loading the supplied Samsung Health CSV…</p>
+<section class="card">
+<p>Line segments connect consecutive CSV records with both systolic and diastolic values; markers identify actual measurements. No readings are created for dates between observations.</p>
+<svg id="chart" viewBox="0 0 1000 480" role="img" aria-label="Line graph of blood pressure measurements from the supplied CSV"></svg>
+<div class="legend"><span><i class="key" style="background:var(--sys)"></i>Systolic (mmHg)</span><span><i class="key" style="background:var(--dia)"></i>Diastolic (mmHg)</span><span><i class="vline"></i>Doctor visit · Oct 6</span></div>
+<div id="stats" class="stats"></div>
+</section>
+<p class="note">Source: Samsung Health blood-pressure CSV. Each plotted point is an actual record in the selected date range. Lines only connect recorded observations; they do not represent additional measurements. This is a visualization of the export, not medical advice.</p>
+</main>
+<script>
+(()=>{'use strict';
+const START='2026-09-06',END='2026-11-09',VISIT='2026-10-06',NS='http://www.w3.org/2000/svg';
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function csv(text){text=text.replace(/^\uFEFF/,'');let rows=[],row=[],field='',q=false;for(let i=0;i<text.length;i++){const c=text[i];if(q){if(c==='"'&&text[i+1]==='"'){field+='"';i++}else if(c==='"')q=false;else field+=c}else if(c==='"')q=true;else if(c===','){row.push(field);field=''}else if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;row.push(field);field='';if(row.some(x=>x!==''))rows.push(row);row=[]}else field+=c}if(field!==''||row.length){row.push(field);if(row.some(x=>x!==''))rows.push(row)}return rows}
+const el=(tag,attrs={},text=null)=>{const n=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);if(text!==null)n.textContent=text;return n};
+const number=v=>v!==undefined&&String(v).trim()!==''&&Number.isFinite(Number(v))?Number(v):null;
+function render(records){const svg=document.getElementById('chart'),W=1000,H=480,m={l:66,r:24,t:36,b:58},iw=W-m.l-m.r,ih=H-m.t-m.b,ymin=40,ymax=140;const t0=new Date(START+'T00:00:00').getTime(),t1=new Date(END+'T23:59:59').getTime();const x=t=>m.l+(t-t0)/(t1-t0)*iw,y=v=>m.t+ih-(v-ymin)/(ymax-ymin)*ih;
+for(let i=0;i<=5;i++){const val=ymax-(ymax-ymin)*i/5,yy=m.t+ih*i/5;svg.append(el('line',{x1:m.l,x2:W-m.r,y1:yy,y2:yy,stroke:css('--grid')}));svg.append(el('text',{x:m.l-9,y:yy+4,'text-anchor':'end','font-size':12,fill:css('--muted')},String(Math.round(val))))}
+const ticks=['2026-09-06','2026-09-13','2026-09-20','2026-09-27','2026-10-04','2026-10-11','2026-10-18','2026-10-25','2026-11-01','2026-11-08'];for(const d of ticks){const xx=x(new Date(d+'T12:00:00').getTime());svg.append(el('line',{x1:xx,x2:xx,y1:m.t,y2:m.t+ih,stroke:css('--grid'),'stroke-dasharray':'2 5'}));svg.append(el('text',{x:xx,y:H-20,'text-anchor':'middle','font-size':11,fill:css('--muted')},new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})))}
+svg.append(el('line',{x1:m.l,x2:W-m.r,y1:m.t+ih,y2:m.t+ih,stroke:'#94a3b8'}));svg.append(el('line',{x1:m.l,x2:m.l,y1:m.t,y2:m.t+ih,stroke:'#94a3b8'}));svg.append(el('text',{x:15,y:20,'font-size':12,fill:css('--muted')},'mmHg'));
+const vx=x(new Date(VISIT+'T12:00:00').getTime());svg.append(el('line',{x1:vx,x2:vx,y1:m.t,y2:m.t+ih,stroke:css('--visit'),'stroke-width':2,'stroke-dasharray':'7 5'}));svg.append(el('text',{x:vx+5,y:m.t+14,'font-size':11,fill:css('--visit')},'Doctor visit · Oct 6'));
+for(const [key,color]of[['systolic',css('--sys')],['diastolic',css('--dia')]]){if(records.length){const d=records.map((r,i)=>`${i?'L':'M'}${x(r.time).toFixed(2)},${y(r[key]).toFixed(2)}`).join(' ');svg.append(el('path',{d,fill:'none',stroke:color,'stroke-width':2.5,'stroke-linejoin':'round','stroke-linecap':'round'}))}for(const r of records){const p=el('circle',{cx:x(r.time),cy:y(r[key]),r:3.8,fill:color,stroke:'#fff','stroke-width':1.2});p.append(el('title',{},`${r.date} ${r.clock}: ${key==='systolic'?'Systolic':'Diastolic'} ${r[key]} mmHg`));svg.append(p)}}
+const mean=k=>records.length?(records.reduce((s,r)=>s+r[k],0)/records.length).toFixed(1):'—';document.getElementById('stats').textContent=`${records.length} CSV rows with both values · ${records.length?records[0].date+' to '+records[records.length-1].date:'no readings in this range'} · Mean among included rows: ${mean('systolic')} / ${mean('diastolic')} mmHg (systolic / diastolic).`}
+async function main(){const res=await fetch('./com.samsung.shealth.blood_pressure.20261109155644.csv');if(!res.ok)throw Error('Could not fetch the supplied blood-pressure CSV.');const rows=csv(await res.text());const hi=rows.findIndex(r=>r.some(c=>c.endsWith('.start_time'))&&r.some(c=>c.endsWith('.systolic'))&&r.some(c=>c.endsWith('.diastolic')));if(hi<0)throw Error('CSV header not found.');const h=rows[hi],di=h.findIndex(c=>c.endsWith('.start_time')),si=h.findIndex(c=>c.endsWith('.systolic')),ai=h.findIndex(c=>c.endsWith('.diastolic'));const records=rows.slice(hi+1).flatMap(r=>{const raw=r[di]||'',date=raw.slice(0,10),systolic=number(r[si]),diastolic=number(r[ai]);if(date<START||date>END||systolic===null||diastolic===null)return[];const time=new Date(raw.replace(' ','T'));if(!Number.isFinite(time.getTime()))return[];return[{date,time:time.getTime(),clock:raw.slice(11,19),systolic,diastolic}]}).sort((a,b)=>a.time-b.time);render(records);const s=document.getElementById('status');s.textContent=`Loaded ${records.length} actual CSV readings. Lines connect actual records only; no missing dates or values are interpolated.`;s.style.background='#ecfdf3';s.style.color='#166534'}
+main().catch(e=>{document.getElementById('status').textContent=`Could not load chart data: ${e.message} The page must be served from a location that also serves the source CSV.`});
+})();
+</script></body></html>
