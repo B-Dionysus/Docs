@@ -1,402 +1,173 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Health Summary — Sep 6 to Nov 9, 2026</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blood glucose &amp; blood pressure — Sep 6 to Nov 9, 2026</title>
   <style>
-    :root {
-      --bg: #f6f7fb;
-      --panel: #ffffff;
-      --ink: #1f2937;
-      --muted: #6b7280;
-      --grid: #dfe7f3;
-      --glucose: #f97316;
-      --pressure-sys: #2563eb;
-      --pressure-dia: #0ea5e9;
-      --accent: #16a34a;
-      --danger: #ef4444;
-      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: var(--bg);
-      color: var(--ink);
-    }
-    .page {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 32px 18px 60px;
-    }
-    h1 {
-      margin: 0 0 8px;
-      font-size: clamp(2rem, 2vw + 1rem, 3rem);
-      letter-spacing: -0.04em;
-    }
-    .subhead {
-      margin: 0 0 24px;
-      color: var(--muted);
-      font-size: 1rem;
-    }
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 18px;
-      margin-bottom: 28px;
-    }
-    .card {
-      background: var(--panel);
-      border-radius: 16px;
-      padding: 18px 20px;
-      box-shadow: var(--shadow);
-    }
-    .kicker {
-      font-size: 0.75rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
-    .value {
-      font-size: clamp(1.6rem, 1.2vw + 1.1rem, 2.5rem);
-      font-weight: 700;
-      margin: 0;
-    }
-    .small {
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-top: 6px;
-    }
-    .panel {
-      background: var(--panel);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      padding: 18px 16px 14px;
-      margin-bottom: 26px;
-    }
-    .panel h2 {
-      margin: 0 0 12px;
-      font-size: 1.25rem;
-    }
-    svg {
-      width: 100%;
-      height: 360px;
-      display: block;
-      background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(246,247,251,0.8));
-      border-radius: 12px;
-    }
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-    .legend span {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 999px;
-      display: inline-block;
-    }
-    .note {
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-top: 12px;
-    }
-    @media (max-width: 700px) {
-      .page { padding-left: 12px; padding-right: 12px; }
-      svg { height: 280px; }
-    }
+    :root { color-scheme: light; --bg:#f4f6fb; --card:#fff; --ink:#172033; --muted:#667085; --grid:#e4e9f2; --orange:#f97316; --blue:#2563eb; --cyan:#0891b2; --visit:#be123c; }
+    * { box-sizing:border-box }
+    body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif }
+    main { max-width:1100px; margin:auto; padding:32px 18px 56px }
+    h1 { margin:0 0 4px; font-size:clamp(1.8rem,4vw,2.7rem); letter-spacing:-.03em }
+    .intro,.note { color:var(--muted) }
+    .panel { background:var(--card); padding:18px; margin-top:22px; border-radius:16px; box-shadow:0 8px 26px #18264012 }
+    h2 { margin:0 0 4px; font-size:1.25rem }
+    .caption { margin:0 0 10px; color:var(--muted); font-size:.92rem }
+    svg { display:block; width:100%; height:auto; min-height:250px }
+    .legend { display:flex; flex-wrap:wrap; gap:16px; color:var(--muted); font-size:.9rem; margin-top:8px }
+    .legend span { display:inline-flex; align-items:center; gap:7px }
+    .key { width:11px; height:11px; border-radius:50%; display:inline-block }
+    .vline { width:18px; height:0; border-top:2px dashed var(--visit); display:inline-block }
+    #status { padding:14px; border-radius:10px; background:#fff7ed; color:#9a3412; margin-top:16px }
+    .stats { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px }
+    .stat { border-radius:10px; background:#f8fafc; padding:10px 12px; color:var(--muted); font-size:.9rem }
+    .stat strong { color:var(--ink) }
+    @media(max-width:600px) { main { padding:22px 10px 36px } .panel { padding:12px } }
   </style>
 </head>
 <body>
-  <div class="page">
-    <h1>Health summary</h1>
-    <p class="subhead">September 6, 2026 through November 9, 2026</p>
-
-    <div class="cards">
-      <div class="card">
-        <div class="kicker">Blood glucose</div>
-        <p class="value">~167 mg/dL</p>
-        <div class="small">Average of the exported readings in the selected window</div>
-      </div>
-      <div class="card">
-        <div class="kicker">Blood pressure</div>
-        <p class="value">~72 / 58</p>
-        <div class="small">Typical systolic / diastolic pattern across the exported readings</div>
-      </div>
-      <div class="card">
-        <div class="kicker">Date span</div>
-        <p class="value">64 days</p>
-        <div class="small">September 6 → November 9</div>
-      </div>
-    </div>
-
-    <div class="panel">
-      <h2>Blood glucose trend</h2>
-      <svg id="glucoseChart" viewBox="0 0 1000 360" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="legend">
-        <span><i class="dot" style="background: var(--glucose);"></i> Blood sugar (mg/dL)</span>
-      </div>
-      <div class="note">Constructed from the mySugr export for the selected date window.</div>
-    </div>
-
-    <div class="panel">
-      <h2>Blood pressure trend</h2>
-      <svg id="pressureChart" viewBox="0 0 1000 360" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="legend">
-        <span><i class="dot" style="background: var(--pressure-sys);"></i> Systolic BP</span>
-        <span><i class="dot" style="background: var(--pressure-dia);"></i> Diastolic BP</span>
-      </div>
-      <div class="note">Constructed from the Samsung Health export for the same date window. Values are shown as representative trend points from the export.</div>
-    </div>
-  </div>
-
-  <script>
-    const glucoseData = [
-      { date: '2026-09-06', value: 194 },
-      { date: '2026-09-10', value: 162 },
-      { date: '2026-09-15', value: 146 },
-      { date: '2026-09-20', value: 152 },
-      { date: '2026-09-25', value: 181 },
-      { date: '2026-09-30', value: 165 },
-      { date: '2026-10-05', value: 159 },
-      { date: '2026-10-10', value: 150 },
-      { date: '2026-10-15', value: 136 },
-      { date: '2026-10-20', value: 156 },
-      { date: '2026-10-25', value: 148 },
-      { date: '2026-10-30', value: 159 },
-      { date: '2026-11-02', value: 158 },
-      { date: '2026-11-05', value: 127 },
-      { date: '2026-11-09', value: 149 }
-    ];
-
-    const pressureData = [
-      { date: '2026-09-06', systolic: 78, diastolic: 60 },
-      { date: '2026-09-15', systolic: 75, diastolic: 60 },
-      { date: '2026-09-25', systolic: 72, diastolic: 59 },
-      { date: '2026-10-01', systolic: 74, diastolic: 58 },
-      { date: '2026-10-05', systolic: 75, diastolic: 60 },
-      { date: '2026-10-10', systolic: 70, diastolic: 57 },
-      { date: '2026-10-15', systolic: 73, diastolic: 58 },
-      { date: '2026-10-20', systolic: 72, diastolic: 57 },
-      { date: '2026-10-25', systolic: 71, diastolic: 58 },
-      { date: '2026-10-30', systolic: 74, diastolic: 59 },
-      { date: '2026-11-02', systolic: 70, diastolic: 56 },
-      { date: '2026-11-05', systolic: 75, diastolic: 58 },
-      { date: '2026-11-09', systolic: 76, diastolic: 59 }
-    ];
-
-    function drawLineChart(svgId, data, key, color, yLabel, minY, maxY, formatValue) {
-      const svg = document.getElementById(svgId);
-      const width = 1000;
-      const height = 360;
-      const margin = { top: 20, right: 28, bottom: 50, left: 56 };
-      const innerW = width - margin.left - margin.right;
-      const innerH = height - margin.top - margin.bottom;
-
-      const yMin = minY;
-      const yMax = maxY;
-      const xStep = innerW / (data.length - 1 || 1);
-
-      const yMap = (v) => margin.top + innerH - ((v - yMin) / (yMax - yMin || 1)) * innerH;
-      const xMap = (i) => margin.left + i * xStep;
-
-      // background grid
-      for (let i = 0; i <= 5; i++) {
-        const y = margin.top + (innerH / 5) * i;
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        line.setAttribute('x1', margin.left);
-        line.setAttribute('x2', width - margin.right);
-        line.setAttribute('y1', y);
-        line.setAttribute('y2', y);
-        line.setAttribute('stroke', '#dfe7f3');
-        line.setAttribute('stroke-width', '1');
-        svg.appendChild(line);
-
-        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        label.setAttribute('x', 10);
-        label.setAttribute('y', y + 4);
-        label.setAttribute('font-size', '12');
-        label.setAttribute('fill', '#6b7280');
-        label.textContent = formatValue(Math.round(yMax - ((yMax - yMin) / 5) * i));
-        svg.appendChild(label);
-      }
-
-      // axis labels
-      const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      xAxis.setAttribute('x1', margin.left);
-      xAxis.setAttribute('x2', width - margin.right);
-      xAxis.setAttribute('y1', height - margin.bottom);
-      xAxis.setAttribute('y2', height - margin.bottom);
-      xAxis.setAttribute('stroke', '#94a3b8');
-      svg.appendChild(xAxis);
-
-      const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      yAxis.setAttribute('x1', margin.left);
-      yAxis.setAttribute('x2', margin.left);
-      yAxis.setAttribute('y1', margin.top);
-      yAxis.setAttribute('y2', height - margin.bottom);
-      yAxis.setAttribute('stroke', '#94a3b8');
-      svg.appendChild(yAxis);
-
-      const pathD = data.map((d, i) => `${i === 0 ? 'M' : 'L'} ${xMap(i)} ${yMap(d[key])}`).join(' ');
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', pathD);
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', color);
-      path.setAttribute('stroke-width', '3');
-      path.setAttribute('stroke-linecap', 'round');
-      path.setAttribute('stroke-linejoin', 'round');
-      svg.appendChild(path);
-
-      // points
-      data.forEach((d, i) => {
-        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('cx', xMap(i));
-        circle.setAttribute('cy', yMap(d[key]));
-        circle.setAttribute('r', '4');
-        circle.setAttribute('fill', color);
-        svg.appendChild(circle);
-      });
-
-      // x labels
-      const dateCount = data.length;
-      const interval = Math.max(1, Math.floor(dateCount / 6));
-      for (let i = 0; i < data.length; i += interval) {
-        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        const value = data[i].date;
-        label.setAttribute('x', xMap(i));
-        label.setAttribute('y', height - 18);
-        label.setAttribute('text-anchor', 'middle');
-        label.setAttribute('font-size', '11');
-        label.setAttribute('fill', '#6b7280');
-        label.textContent = new Date(value + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        svg.appendChild(label);
-      }
-
-      // Y label
-      const yLabelEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      yLabelEl.setAttribute('x', 14);
-      yLabelEl.setAttribute('y', 18);
-      yLabelEl.setAttribute('font-size', '12');
-      yLabelEl.setAttribute('fill', '#6b7280');
-      yLabelEl.textContent = yLabel;
-      svg.appendChild(yLabelEl);
+<main>
+  <h1>Blood glucose &amp; blood pressure</h1>
+  <p class="intro">September 6–November 9, 2026 · Doctor visit: October 6, 2026</p>
+  <div id="status" role="status">Loading the source CSV exports… Keep this page beside both CSV files, or open it from the configured site where the CSV files are served.</div>
+  <section class="panel">
+    <h2>Blood glucose</h2>
+    <p class="caption">Individual exported blood sugar readings (mg/dL). Each dot is one recorded measurement; dots are not connected.</p>
+    <svg id="glucose" viewBox="0 0 1000 390" role="img" aria-label="Scatter plot of recorded blood glucose measurements"></svg>
+    <div class="legend"><span><i class="key" style="background:var(--orange)"></i>Recorded glucose</span><span><i class="vline"></i>Doctor visit · Oct 6</span></div>
+    <div id="glucoseStats" class="stats"></div>
+  </section>
+  <section class="panel">
+    <h2>Blood pressure</h2>
+    <p class="caption">Individual exported systolic and diastolic readings (mmHg), plotted only at their recorded timestamps. No values are interpolated or added for missing dates.</p>
+    <svg id="pressure" viewBox="0 0 1000 390" role="img" aria-label="Scatter plot of recorded systolic and diastolic blood pressure measurements"></svg>
+    <div class="legend"><span><i class="key" style="background:var(--blue)"></i>Systolic</span><span><i class="key" style="background:var(--cyan)"></i>Diastolic</span><span><i class="vline"></i>Doctor visit · Oct 6</span></div>
+    <div id="pressureStats" class="stats"></div>
+  </section>
+  <p class="note">This page visualizes the supplied exports and is not medical advice. Missing dates are left blank. The date window and October 6 marker do not imply that a measurement was recorded on that date.</p>
+</main>
+<script>
+(() => {
+  'use strict';
+  const START = '2026-09-06';
+  const END = '2026-11-09';
+  const VISIT = '2026-10-06';
+  const NS = 'http://www.w3.org/2000/svg';
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const parseCSV = text => {
+    const rows = []; let row = [], field = '', quoted = false;
+    text = text.replace(/^\uFEFF/, '');
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (quoted) {
+        if (c === '"' && text[i + 1] === '"') { field += '"'; i++; }
+        else if (c === '"') quoted = false;
+        else field += c;
+      } else if (c === '"') quoted = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        row.push(field); field = '';
+        if (row.some(v => v !== '')) rows.push(row);
+        row = [];
+      } else field += c;
     }
-
-    drawLineChart('glucoseChart', glucoseData, 'value', '#f97316', 'mg/dL', 120, 240, (n) => n);
-
-    const pressureSvg = document.getElementById('pressureChart');
-    const pressureWidth = 1000;
-    const pressureHeight = 360;
-    const margin = { top: 20, right: 28, bottom: 50, left: 56 };
-    const innerW = pressureWidth - margin.left - margin.right;
-    const innerH = pressureHeight - margin.top - margin.bottom;
-    const minY = 48;
-    const maxY = 90;
-    const step = innerW / (pressureData.length - 1 || 1);
-
-    const yMap = (v) => margin.top + innerH - ((v - minY) / (maxY - minY || 1)) * innerH;
-    const xMap = (i) => margin.left + i * step;
-
-    for (let i = 0; i <= 5; i++) {
-      const y = margin.top + (innerH / 5) * i;
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', margin.left);
-      line.setAttribute('x2', pressureWidth - margin.right);
-      line.setAttribute('y1', y);
-      line.setAttribute('y2', y);
-      line.setAttribute('stroke', '#dfe7f3');
-      line.setAttribute('stroke-width', '1');
-      pressureSvg.appendChild(line);
-
-      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      label.setAttribute('x', 10);
-      label.setAttribute('y', y + 4);
-      label.setAttribute('font-size', '12');
-      label.setAttribute('fill', '#6b7280');
-      label.textContent = String(Math.round(maxY - ((maxY - minY) / 5) * i));
-      pressureSvg.appendChild(label);
+    if (field !== '' || row.length) { row.push(field); if (row.some(v => v !== '')) rows.push(row); }
+    return rows;
+  };
+  const num = v => { const n = Number(v); return v !== undefined && String(v).trim() !== '' && Number.isFinite(n) ? n : null; };
+  const dateInRange = value => typeof value === 'string' && value >= START && value <= END;
+  const el = (tag, attrs = {}, text = null) => {
+    const node = document.createElementNS(NS, tag);
+    for (const [k,v] of Object.entries(attrs)) node.setAttribute(k, v);
+    if (text !== null) node.textContent = text;
+    return node;
+  };
+  const clear = svg => { while (svg.firstChild) svg.removeChild(svg.firstChild); };
+  const parseGlucose = rows => {
+    const headerIndex = rows.findIndex(r => r.includes('Date') && r.includes('Time') && r.includes('Blood Sugar Measurement (mg/dL)'));
+    if (headerIndex < 0) throw new Error('Could not locate the mySugr CSV header.');
+    const header = rows[headerIndex];
+    const dateCol = header.indexOf('Date'), timeCol = header.indexOf('Time'), valueCol = header.indexOf('Blood Sugar Measurement (mg/dL)');
+    return rows.slice(headerIndex + 1).flatMap(r => {
+      const value = num(r[valueCol]);
+      if (value === null) return [];
+      const d = new Date(`${r[dateCol]} ${r[timeCol]}`);
+      if (!Number.isFinite(d.getTime())) return [];
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      return dateInRange(key) ? [{ date:key, time:d, value }] : [];
+    }).sort((a,b) => a.time-b.time);
+  };
+  const parsePressure = rows => {
+    const headerIndex = rows.findIndex(r => r.some(c => c.endsWith('.start_time')) && r.some(c => c.endsWith('.systolic')) && r.some(c => c.endsWith('.diastolic')));
+    if (headerIndex < 0) throw new Error('Could not locate the Samsung Health blood-pressure CSV header.');
+    const header = rows[headerIndex];
+    const dateCol = header.findIndex(c => c.endsWith('.start_time'));
+    const sysCol = header.findIndex(c => c.endsWith('.systolic'));
+    const diaCol = header.findIndex(c => c.endsWith('.diastolic'));
+    return rows.slice(headerIndex + 1).flatMap(r => {
+      const rawDate = r[dateCol] || '';
+      const key = rawDate.slice(0,10);
+      const systolic = num(r[sysCol]), diastolic = num(r[diaCol]);
+      if (!dateInRange(key) || systolic === null || diastolic === null) return [];
+      const time = new Date(rawDate.replace(' ', 'T'));
+      return [{ date:key, time:Number.isFinite(time.getTime()) ? time : new Date(`${key}T12:00:00`), systolic, diastolic }];
+    }).sort((a,b) => a.time-b.time);
+  };
+  const drawChart = ({svgId, series, minY, maxY, yTitle, pointColors, valueKeys}) => {
+    const svg = document.getElementById(svgId); clear(svg);
+    const W=1000,H=390,m={l:66,r:24,t:22,b:54}, iw=W-m.l-m.r, ih=H-m.t-m.b;
+    const startMs = new Date(`${START}T00:00:00`).getTime();
+    const endMs = new Date(`${END}T23:59:59`).getTime();
+    const x = date => m.l + ((new Date(`${date}T12:00:00`).getTime()-startMs)/(endMs-startMs))*iw;
+    const y = value => m.t + ih - ((value-minY)/(maxY-minY))*ih;
+    for (let i=0;i<=5;i++) {
+      const val=maxY-(maxY-minY)*i/5, yy=m.t+ih*i/5;
+      svg.appendChild(el('line',{x1:m.l,x2:W-m.r,y1:yy,y2:yy,stroke:css('--grid')}));
+      svg.appendChild(el('text',{x:m.l-10,y:yy+4,'text-anchor':'end','font-size':'12',fill:css('--muted')},String(Math.round(val))));
     }
-
-    const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    xAxis.setAttribute('x1', margin.left);
-    xAxis.setAttribute('x2', pressureWidth - margin.right);
-    xAxis.setAttribute('y1', pressureHeight - margin.bottom);
-    xAxis.setAttribute('y2', pressureHeight - margin.bottom);
-    xAxis.setAttribute('stroke', '#94a3b8');
-    pressureSvg.appendChild(xAxis);
-
-    const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    yAxis.setAttribute('x1', margin.left);
-    yAxis.setAttribute('x2', margin.left);
-    yAxis.setAttribute('y1', margin.top);
-    yAxis.setAttribute('y2', pressureHeight - margin.bottom);
-    yAxis.setAttribute('stroke', '#94a3b8');
-    pressureSvg.appendChild(yAxis);
-
-    const sysPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    sysPath.setAttribute('d', pressureData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${xMap(i)} ${yMap(d.systolic)}`).join(' '));
-    sysPath.setAttribute('fill', 'none');
-    sysPath.setAttribute('stroke', '#2563eb');
-    sysPath.setAttribute('stroke-width', '3');
-    sysPath.setAttribute('stroke-linecap', 'round');
-    sysPath.setAttribute('stroke-linejoin', 'round');
-    pressureSvg.appendChild(sysPath);
-
-    const diaPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    diaPath.setAttribute('d', pressureData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${xMap(i)} ${yMap(d.diastolic)}`).join(' '));
-    diaPath.setAttribute('fill', 'none');
-    diaPath.setAttribute('stroke', '#0ea5e9');
-    diaPath.setAttribute('stroke-width', '3');
-    diaPath.setAttribute('stroke-linecap', 'round');
-    diaPath.setAttribute('stroke-linejoin', 'round');
-    pressureSvg.appendChild(diaPath);
-
-    pressureData.forEach((d, i) => {
-      const sysPoint = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      sysPoint.setAttribute('cx', xMap(i));
-      sysPoint.setAttribute('cy', yMap(d.systolic));
-      sysPoint.setAttribute('r', '4');
-      sysPoint.setAttribute('fill', '#2563eb');
-      pressureSvg.appendChild(sysPoint);
-
-      const diaPoint = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      diaPoint.setAttribute('cx', xMap(i));
-      diaPoint.setAttribute('cy', yMap(d.diastolic));
-      diaPoint.setAttribute('r', '4');
-      diaPoint.setAttribute('fill', '#0ea5e9');
-      pressureSvg.appendChild(diaPoint);
+    const tickDates=['2026-09-06','2026-09-13','2026-09-20','2026-09-27','2026-10-04','2026-10-11','2026-10-18','2026-10-25','2026-11-01','2026-11-08'];
+    tickDates.forEach(d => {
+      const xx=x(d); svg.appendChild(el('line',{x1:xx,x2:xx,y1:m.t,y2:m.t+ih,stroke:css('--grid'),'stroke-dasharray':'2 5'}));
+      const label=new Date(`${d}T12:00:00`).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+      svg.appendChild(el('text',{x:xx,y:H-20,'text-anchor':'middle','font-size':'11',fill:css('--muted')},label));
     });
-
-    const dateStep = Math.max(1, Math.floor(pressureData.length / 6));
-    for (let i = 0; i < pressureData.length; i += dateStep) {
-      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      label.setAttribute('x', xMap(i));
-      label.setAttribute('y', pressureHeight - 18);
-      label.setAttribute('text-anchor', 'middle');
-      label.setAttribute('font-size', '11');
-      label.setAttribute('fill', '#6b7280');
-      label.textContent = new Date(pressureData[i].date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      pressureSvg.appendChild(label);
-    }
-
-    const yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    yLabel.setAttribute('x', 12);
-    yLabel.setAttribute('y', 18);
-    yLabel.setAttribute('font-size', '12');
-    yLabel.setAttribute('fill', '#6b7280');
-    yLabel.textContent = 'mmHg';
-    pressureSvg.appendChild(yLabel);
-  </script>
+    svg.appendChild(el('line',{x1:m.l,x2:W-m.r,y1:m.t+ih,y2:m.t+ih,stroke:'#94a3b8'}));
+    svg.appendChild(el('line',{x1:m.l,x2:m.l,y1:m.t,y2:m.t+ih,stroke:'#94a3b8'}));
+    const visitX=x(VISIT);
+    svg.appendChild(el('line',{x1:visitX,x2:visitX,y1:m.t,y2:m.t+ih,stroke:css('--visit'),'stroke-width':'2','stroke-dasharray':'7 5'}));
+    svg.appendChild(el('text',{x:visitX+5,y:m.t+13,'font-size':'11',fill:css('--visit')},'Doctor visit · Oct 6'));
+    svg.appendChild(el('text',{x:15,y:16,'font-size':'12',fill:css('--muted')},yTitle));
+    series.forEach(point => valueKeys.forEach((key,i) => {
+      const value=point[key];
+      const circle=el('circle',{cx:x(point.date),cy:y(value),r:'4.2',fill:pointColors[i],stroke:'#fff','stroke-width':'1.2'});
+      circle.appendChild(el('title',{},`${point.date}${point.time ? ' '+point.time.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : ''}: ${key==='value' ? `${value} mg/dL` : `${key==='systolic'?'Systolic':'Diastolic'} ${value} mmHg`}`));
+      svg.appendChild(circle);
+    }));
+  };
+  const average = (records,key) => records.length ? (records.reduce((sum,r)=>sum+r[key],0)/records.length).toFixed(1) : '—';
+  const setStats = (id, items) => {
+    const box=document.getElementById(id); box.replaceChildren(...items.map(([label,value]) => {
+      const div=document.createElement('div'); div.className='stat'; const strong=document.createElement('strong'); strong.textContent=value; div.append(strong,document.createTextNode(` ${label}`)); return div;
+    }));
+  };
+  async function main() {
+    const [glucoseText, pressureText] = await Promise.all([
+      fetch('./mySugr_Export_2026-11-09-16-08.csv').then(r=>{if(!r.ok) throw new Error('Could not load the mySugr CSV.'); return r.text();}),
+      fetch('./com.samsung.shealth.blood_pressure.20261109155644.csv').then(r=>{if(!r.ok) throw new Error('Could not load the blood-pressure CSV.'); return r.text();})
+    ]);
+    const glucose=parseGlucose(parseCSV(glucoseText));
+    const pressure=parsePressure(parseCSV(pressureText));
+    drawChart({svgId:'glucose',series:glucose,minY:60,maxY:320,yTitle:'Blood sugar (mg/dL)',pointColors:[css('--orange')],valueKeys:['value']});
+    drawChart({svgId:'pressure',series:pressure,minY:40,maxY:140,yTitle:'Blood pressure (mmHg)',pointColors:[css('--blue'),css('--cyan')],valueKeys:['systolic','diastolic']});
+    setStats('glucoseStats',[[`${glucose.length} recorded readings`,''+glucose.length],[`observed dates`,glucose.length ? `${glucose[0].date} – ${glucose[glucose.length-1].date}` : 'none'],[`mean of recorded values`,glucose.length ? `${average(glucose,'value')} mg/dL` : '—']]);
+    setStats('pressureStats',[[`${pressure.length} readings with both values`,''+pressure.length],[`observed dates`,pressure.length ? `${pressure[0].date} – ${pressure[pressure.length-1].date}` : 'none'],[`mean of recorded systolic`,pressure.length ? `${average(pressure,'systolic')} mmHg` : '—'],[`mean of recorded diastolic`,pressure.length ? `${average(pressure,'diastolic')} mmHg` : '—']]);
+    const status=document.getElementById('status'); status.style.background='#ecfdf3'; status.style.color='#166534';
+    status.textContent=`Loaded ${glucose.length} glucose measurements and ${pressure.length} blood-pressure measurements from the supplied exports. Only recorded readings are plotted; no missing dates or values are filled in.`;
+  }
+  main().catch(error => { document.getElementById('status').textContent=`Could not load the source data: ${error.message} This page must be served from a location that includes both CSV files, or opened with a local web server.`; });
+})();
+</script>
 </body>
 </html>
