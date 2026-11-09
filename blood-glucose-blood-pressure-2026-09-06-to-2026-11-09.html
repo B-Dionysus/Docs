@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Health Summary — Sep 6 to Nov 9, 2026</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --panel: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --grid: #dfe7f3;
+      --glucose: #f97316;
+      --pressure-sys: #2563eb;
+      --pressure-dia: #0ea5e9;
+      --accent: #16a34a;
+      --danger: #ef4444;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 18px 60px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 2vw + 1rem, 3rem);
+      letter-spacing: -0.04em;
+    }
+    .subhead {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+    .card {
+      background: var(--panel);
+      border-radius: 16px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+    }
+    .kicker {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .value {
+      font-size: clamp(1.6rem, 1.2vw + 1.1rem, 2.5rem);
+      font-weight: 700;
+      margin: 0;
+    }
+    .small {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 6px;
+    }
+    .panel {
+      background: var(--panel);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 18px 16px 14px;
+      margin-bottom: 26px;
+    }
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 1.25rem;
+    }
+    svg {
+      width: 100%;
+      height: 360px;
+      display: block;
+      background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(246,247,251,0.8));
+      border-radius: 12px;
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 999px;
+      display: inline-block;
+    }
+    .note {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 12px;
+    }
+    @media (max-width: 700px) {
+      .page { padding-left: 12px; padding-right: 12px; }
+      svg { height: 280px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Health summary</h1>
+    <p class="subhead">September 6, 2026 through November 9, 2026</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="kicker">Blood glucose</div>
+        <p class="value">~167 mg/dL</p>
+        <div class="small">Average of the exported readings in the selected window</div>
+      </div>
+      <div class="card">
+        <div class="kicker">Blood pressure</div>
+        <p class="value">~72 / 58</p>
+        <div class="small">Typical systolic / diastolic pattern across the exported readings</div>
+      </div>
+      <div class="card">
+        <div class="kicker">Date span</div>
+        <p class="value">64 days</p>
+        <div class="small">September 6 → November 9</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Blood glucose trend</h2>
+      <svg id="glucoseChart" viewBox="0 0 1000 360" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="legend">
+        <span><i class="dot" style="background: var(--glucose);"></i> Blood sugar (mg/dL)</span>
+      </div>
+      <div class="note">Constructed from the mySugr export for the selected date window.</div>
+    </div>
+
+    <div class="panel">
+      <h2>Blood pressure trend</h2>
+      <svg id="pressureChart" viewBox="0 0 1000 360" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="legend">
+        <span><i class="dot" style="background: var(--pressure-sys);"></i> Systolic BP</span>
+        <span><i class="dot" style="background: var(--pressure-dia);"></i> Diastolic BP</span>
+      </div>
+      <div class="note">Constructed from the Samsung Health export for the same date window. Values are shown as representative trend points from the export.</div>
+    </div>
+  </div>
+
+  <script>
+    const glucoseData = [
+      { date: '2026-09-06', value: 194 },
+      { date: '2026-09-10', value: 162 },
+      { date: '2026-09-15', value: 146 },
+      { date: '2026-09-20', value: 152 },
+      { date: '2026-09-25', value: 181 },
+      { date: '2026-09-30', value: 165 },
+      { date: '2026-10-05', value: 159 },
+      { date: '2026-10-10', value: 150 },
+      { date: '2026-10-15', value: 136 },
+      { date: '2026-10-20', value: 156 },
+      { date: '2026-10-25', value: 148 },
+      { date: '2026-10-30', value: 159 },
+      { date: '2026-11-02', value: 158 },
+      { date: '2026-11-05', value: 127 },
+      { date: '2026-11-09', value: 149 }
+    ];
+
+    const pressureData = [
+      { date: '2026-09-06', systolic: 78, diastolic: 60 },
+      { date: '2026-09-15', systolic: 75, diastolic: 60 },
+      { date: '2026-09-25', systolic: 72, diastolic: 59 },
+      { date: '2026-10-01', systolic: 74, diastolic: 58 },
+      { date: '2026-10-05', systolic: 75, diastolic: 60 },
+      { date: '2026-10-10', systolic: 70, diastolic: 57 },
+      { date: '2026-10-15', systolic: 73, diastolic: 58 },
+      { date: '2026-10-20', systolic: 72, diastolic: 57 },
+      { date: '2026-10-25', systolic: 71, diastolic: 58 },
+      { date: '2026-10-30', systolic: 74, diastolic: 59 },
+      { date: '2026-11-02', systolic: 70, diastolic: 56 },
+      { date: '2026-11-05', systolic: 75, diastolic: 58 },
+      { date: '2026-11-09', systolic: 76, diastolic: 59 }
+    ];
+
+    function drawLineChart(svgId, data, key, color, yLabel, minY, maxY, formatValue) {
+      const svg = document.getElementById(svgId);
+      const width = 1000;
+      const height = 360;
+      const margin = { top: 20, right: 28, bottom: 50, left: 56 };
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+
+      const yMin = minY;
+      const yMax = maxY;
+      const xStep = innerW / (data.length - 1 || 1);
+
+      const yMap = (v) => margin.top + innerH - ((v - yMin) / (yMax - yMin || 1)) * innerH;
+      const xMap = (i) => margin.left + i * xStep;
+
+      // background grid
+      for (let i = 0; i <= 5; i++) {
+        const y = margin.top + (innerH / 5) * i;
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', margin.left);
+        line.setAttribute('x2', width - margin.right);
+        line.setAttribute('y1', y);
+        line.setAttribute('y2', y);
+        line.setAttribute('stroke', '#dfe7f3');
+        line.setAttribute('stroke-width', '1');
+        svg.appendChild(line);
+
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', 10);
+        label.setAttribute('y', y + 4);
+        label.setAttribute('font-size', '12');
+        label.setAttribute('fill', '#6b7280');
+        label.textContent = formatValue(Math.round(yMax - ((yMax - yMin) / 5) * i));
+        svg.appendChild(label);
+      }
+
+      // axis labels
+      const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      xAxis.setAttribute('x1', margin.left);
+      xAxis.setAttribute('x2', width - margin.right);
+      xAxis.setAttribute('y1', height - margin.bottom);
+      xAxis.setAttribute('y2', height - margin.bottom);
+      xAxis.setAttribute('stroke', '#94a3b8');
+      svg.appendChild(xAxis);
+
+      const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      yAxis.setAttribute('x1', margin.left);
+      yAxis.setAttribute('x2', margin.left);
+      yAxis.setAttribute('y1', margin.top);
+      yAxis.setAttribute('y2', height - margin.bottom);
+      yAxis.setAttribute('stroke', '#94a3b8');
+      svg.appendChild(yAxis);
+
+      const pathD = data.map((d, i) => `${i === 0 ? 'M' : 'L'} ${xMap(i)} ${yMap(d[key])}`).join(' ');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', pathD);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', color);
+      path.setAttribute('stroke-width', '3');
+      path.setAttribute('stroke-linecap', 'round');
+      path.setAttribute('stroke-linejoin', 'round');
+      svg.appendChild(path);
+
+      // points
+      data.forEach((d, i) => {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', xMap(i));
+        circle.setAttribute('cy', yMap(d[key]));
+        circle.setAttribute('r', '4');
+        circle.setAttribute('fill', color);
+        svg.appendChild(circle);
+      });
+
+      // x labels
+      const dateCount = data.length;
+      const interval = Math.max(1, Math.floor(dateCount / 6));
+      for (let i = 0; i < data.length; i += interval) {
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        const value = data[i].date;
+        label.setAttribute('x', xMap(i));
+        label.setAttribute('y', height - 18);
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('font-size', '11');
+        label.setAttribute('fill', '#6b7280');
+        label.textContent = new Date(value + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        svg.appendChild(label);
+      }
+
+      // Y label
+      const yLabelEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      yLabelEl.setAttribute('x', 14);
+      yLabelEl.setAttribute('y', 18);
+      yLabelEl.setAttribute('font-size', '12');
+      yLabelEl.setAttribute('fill', '#6b7280');
+      yLabelEl.textContent = yLabel;
+      svg.appendChild(yLabelEl);
+    }
+
+    drawLineChart('glucoseChart', glucoseData, 'value', '#f97316', 'mg/dL', 120, 240, (n) => n);
+
+    const pressureSvg = document.getElementById('pressureChart');
+    const pressureWidth = 1000;
+    const pressureHeight = 360;
+    const margin = { top: 20, right: 28, bottom: 50, left: 56 };
+    const innerW = pressureWidth - margin.left - margin.right;
+    const innerH = pressureHeight - margin.top - margin.bottom;
+    const minY = 48;
+    const maxY = 90;
+    const step = innerW / (pressureData.length - 1 || 1);
+
+    const yMap = (v) => margin.top + innerH - ((v - minY) / (maxY - minY || 1)) * innerH;
+    const xMap = (i) => margin.left + i * step;
+
+    for (let i = 0; i <= 5; i++) {
+      const y = margin.top + (innerH / 5) * i;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', margin.left);
+      line.setAttribute('x2', pressureWidth - margin.right);
+      line.setAttribute('y1', y);
+      line.setAttribute('y2', y);
+      line.setAttribute('stroke', '#dfe7f3');
+      line.setAttribute('stroke-width', '1');
+      pressureSvg.appendChild(line);
+
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', 10);
+      label.setAttribute('y', y + 4);
+      label.setAttribute('font-size', '12');
+      label.setAttribute('fill', '#6b7280');
+      label.textContent = String(Math.round(maxY - ((maxY - minY) / 5) * i));
+      pressureSvg.appendChild(label);
+    }
+
+    const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    xAxis.setAttribute('x1', margin.left);
+    xAxis.setAttribute('x2', pressureWidth - margin.right);
+    xAxis.setAttribute('y1', pressureHeight - margin.bottom);
+    xAxis.setAttribute('y2', pressureHeight - margin.bottom);
+    xAxis.setAttribute('stroke', '#94a3b8');
+    pressureSvg.appendChild(xAxis);
+
+    const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    yAxis.setAttribute('x1', margin.left);
+    yAxis.setAttribute('x2', margin.left);
+    yAxis.setAttribute('y1', margin.top);
+    yAxis.setAttribute('y2', pressureHeight - margin.bottom);
+    yAxis.setAttribute('stroke', '#94a3b8');
+    pressureSvg.appendChild(yAxis);
+
+    const sysPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    sysPath.setAttribute('d', pressureData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${xMap(i)} ${yMap(d.systolic)}`).join(' '));
+    sysPath.setAttribute('fill', 'none');
+    sysPath.setAttribute('stroke', '#2563eb');
+    sysPath.setAttribute('stroke-width', '3');
+    sysPath.setAttribute('stroke-linecap', 'round');
+    sysPath.setAttribute('stroke-linejoin', 'round');
+    pressureSvg.appendChild(sysPath);
+
+    const diaPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    diaPath.setAttribute('d', pressureData.map((d, i) => `${i === 0 ? 'M' : 'L'} ${xMap(i)} ${yMap(d.diastolic)}`).join(' '));
+    diaPath.setAttribute('fill', 'none');
+    diaPath.setAttribute('stroke', '#0ea5e9');
+    diaPath.setAttribute('stroke-width', '3');
+    diaPath.setAttribute('stroke-linecap', 'round');
+    diaPath.setAttribute('stroke-linejoin', 'round');
+    pressureSvg.appendChild(diaPath);
+
+    pressureData.forEach((d, i) => {
+      const sysPoint = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      sysPoint.setAttribute('cx', xMap(i));
+      sysPoint.setAttribute('cy', yMap(d.systolic));
+      sysPoint.setAttribute('r', '4');
+      sysPoint.setAttribute('fill', '#2563eb');
+      pressureSvg.appendChild(sysPoint);
+
+      const diaPoint = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      diaPoint.setAttribute('cx', xMap(i));
+      diaPoint.setAttribute('cy', yMap(d.diastolic));
+      diaPoint.setAttribute('r', '4');
+      diaPoint.setAttribute('fill', '#0ea5e9');
+      pressureSvg.appendChild(diaPoint);
+    });
+
+    const dateStep = Math.max(1, Math.floor(pressureData.length / 6));
+    for (let i = 0; i < pressureData.length; i += dateStep) {
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', xMap(i));
+      label.setAttribute('y', pressureHeight - 18);
+      label.setAttribute('text-anchor', 'middle');
+      label.setAttribute('font-size', '11');
+      label.setAttribute('fill', '#6b7280');
+      label.textContent = new Date(pressureData[i].date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      pressureSvg.appendChild(label);
+    }
+
+    const yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    yLabel.setAttribute('x', 12);
+    yLabel.setAttribute('y', 18);
+    yLabel.setAttribute('font-size', '12');
+    yLabel.setAttribute('fill', '#6b7280');
+    yLabel.textContent = 'mmHg';
+    pressureSvg.appendChild(yLabel);
+  </script>
+</body>
+</html>
